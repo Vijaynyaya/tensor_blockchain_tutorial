@@ -19,7 +19,7 @@ func main() {
 
 	// traverse the blocks in the blockchain
 	for i, block := range chain.Blocks {
-		// print the formatted string representation of the block
+		// 📄 print the formatted string representation of the block
 		strBlock := fmt.Sprintf(
 			"Block %d %x {\n"+
 				"\tPrevious Hash: %x\n"+
@@ -30,6 +30,7 @@ func main() {
 		)
 		fmt.Print(strBlock)
 
+		// Validate block 👩‍⚖️
 		pow := blockchain.NewProof(block)
 		fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
 		fmt.Println()
