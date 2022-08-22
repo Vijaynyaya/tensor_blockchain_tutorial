@@ -15,6 +15,8 @@ import (
 	"math/big"
 )
 
+// TODO: add support for dynamic difficulty.
+// This requires the functionality to replay through the blockchain to resign the blocks with new difficulty.
 const Difficulty = 12 // the greater the difficulty the smaller the (Target)
 
 type ProofOfWork struct {

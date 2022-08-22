@@ -11,6 +11,11 @@ Blockchain: a public database distributed across different peers:
 */
 package blockchain
 
+import (
+	"bytes"
+	"encoding/gob"
+)
+
 /*
 Blockchain is composed of blocks. 🧱
 Each block contains the data to be persisted to the database and a hash associated with the block.
@@ -36,26 +41,32 @@ func CreateBlock(data string, prevHash []byte) *Block {
 	return block
 }
 
-// Blockchain ⛓
-type BlockChain struct {
-	Blocks []*Block // TODO: rather than stroing blocks in slice, reference blocks by their hash or value.
-}
-
-// Adds a block to the blockchain 👶
-func (chain *BlockChain) AddBlock(data string) {
-	indexLastBlock := len(chain.Blocks) - 1
-	prevBlock := chain.Blocks[indexLastBlock]
-
-	newBlock := CreateBlock(data, prevBlock.Hash)
-	chain.Blocks = append(chain.Blocks, newBlock)
-}
-
 // Creates the genesis block 🎅🧬
 func Genesis() *Block {
 	return CreateBlock("Genesis: The First Block", []byte{})
 }
 
-// Initializes a new blockchain 🤶
-func InitBlockChain() *BlockChain {
-	return &BlockChain{[]*Block{Genesis()}}
+// Serializes a block to a bytes
+func (b *Block) Serialize() []byte {
+	var res bytes.Buffer
+	encoder := gob.NewEncoder(&res)
+
+	err := encoder.Encode(b)
+
+	Handle(err)
+
+	return res.Bytes()
+}
+
+// Deserailizes a block from bytes
+func Deserialize(data []byte) *Block {
+	var block Block
+
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+
+	err := decoder.Decode(&block)
+
+	Handle(err)
+
+	return &block
 }
