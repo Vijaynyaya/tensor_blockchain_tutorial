@@ -13,6 +13,7 @@ package blockchain
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
 )
 
@@ -21,15 +22,28 @@ Blockchain is composed of blocks. 🧱
 Each block contains the data to be persisted to the database and a hash associated with the block.
 */
 type Block struct {
-	Hash     []byte // #️⃣ Hash of the block
-	Data     []byte // 📄 Data inside the block
-	PrevHash []byte // #️⃣🖇 Last block's hash (back linked list)
-	Nonce    int
+	Hash         []byte         // #️⃣ Hash of the block
+	Transactions []*Transaction // 📄 Data inside the block
+	PrevHash     []byte         // #️⃣🖇 Last block's hash (back linked list)
+	Nonce        int            // Proof of Work's solution
+}
+
+// Returns a single hash by hashing hashes of all the transactions in the block
+func (b *Block) HashTransactions() []byte {
+	var txHashes [][]byte
+	var txHash [32]byte
+
+	for _, tx := range b.Transactions {
+		txHashes = append(txHashes, tx.ID)
+	}
+	txHash = sha256.Sum256(bytes.Join(txHashes, []byte{}))
+
+	return txHash[:]
 }
 
 // Creates a block 🏭
-func CreateBlock(data string, prevHash []byte) *Block {
-	block := &Block{[]byte{}, []byte(data), prevHash, 0}
+func CreateBlock(txs []*Transaction, prevHash []byte) *Block {
+	block := &Block{[]byte{}, txs, prevHash, 0}
 	// 👩‍⚖️ define proof of work (requirements)
 	pow := NewProof(block)
 
@@ -42,8 +56,8 @@ func CreateBlock(data string, prevHash []byte) *Block {
 }
 
 // Creates the genesis block 🎅🧬
-func Genesis() *Block {
-	return CreateBlock("Genesis: The First Block", []byte{})
+func Genesis(coinbase *Transaction) *Block {
+	return CreateBlock([]*Transaction{coinbase}, []byte{})
 }
 
 // Serializes a block to a bytes
